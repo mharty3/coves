@@ -23,19 +23,26 @@ con.install_extension("spatial")
 con.load_extension("spatial")
 
 # get the links to the zipped TIGER shapefiles from the census website
-r = requests.get('https://www2.census.gov/geo/tiger/TIGER_RD18/LAYER/ROADS/')
+pfix = 'https://www2.census.gov/geo/tiger/TIGER_RD18/LAYER/ROADS/'
+r = requests.get(pfix)
 soup = BeautifulSoup(r.content, 'html.parser')
 links = soup.find_all("a") # Find all elements with the tag <a>
 
-pfix = 'https://www2.census.gov/geo/tiger/TIGER_RD18/LAYER/ROADS/'
-links = [pfix + link.get("href") for link in links[6] if link.get('href').startswith('tl_rd22')]
+links = [pfix + link.get("href") for link in links[6] 
+             if link.get('href').startswith('tl_rd22')]
 
-# use geopandas to read the zipped shapefiles and save them as parquet files
+# use geopandas to read the zipped shapefiles 
+# and then save them as parquet files
+
 # it doesn't seem like duckdb can read zipped shapefiles
 pattern = r'_(\d{5})_'
 for link in tqdm(links):
-    matches = re.findall(pattern, link) # get the county fips code from the link to add to the dataframe
-    gpd.read_file(link).assign(county_fips=matches[0]).to_parquet(f'data/roads/{matches[0]}.parquet')
+    # regex to extract the county fips code from the link to add to the dataframe
+    matches = re.findall(pattern, link) 
+    (gpd.read_file(link)
+        .assign(county_fips=matches[0])
+        .to_parquet(f'data/roads/{matches[0]}.parquet')
+    )
 
 # create a table in the database containing all the roads from the shapefiles
 con.sql(

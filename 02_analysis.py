@@ -2,7 +2,7 @@ import geopandas as gpd
 
 
 county_counts = gpd.read_file('data/county_cove_count.json')
-print(county_counts.head())
+print(county_counts.head(10))
 
 """
            long_name  cove_count
