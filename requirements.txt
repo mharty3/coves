@@ -1,6 +1,7 @@
 geopandas
 duckdb
-leafmap
 requests
 tqdm
 bs4
+folium
+pyarrow
